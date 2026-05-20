@@ -20,6 +20,10 @@ const TratamientoSchema = mongoose.Schema({
     recomendaciones: {
         type: [String],
         default: []
+    },
+    activo: {
+        type: Boolean,
+        default: true
     }
 }, {
     collection: 'tratamientos'

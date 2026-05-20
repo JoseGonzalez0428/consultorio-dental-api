@@ -33,12 +33,18 @@ const getMisCitas = async (req = request, res = response) => {
             .populate('id_tratamiento', 'nombre')
             .sort({ fecha: 1, hora: 1 });
 
-        const citasFormateadas = citas.map(c => ({
+        const citasOrdenadas = [
+            ...citas.filter(c => c.estado === 'Pendiente'),
+            ...citas.filter(c => c.estado === 'Terminado'),
+            ...citas.filter(c => c.estado === 'Cancelado')
+        ];
+
+        const citasFormateadas = citasOrdenadas.map(c => ({
             _id: c._id,
             fecha: c.fecha,
             hora: c.hora,
             estado: c.estado,
-            nombre_tratamiento: c.id_tratamiento.nombre
+            nombre_tratamiento: c.id_tratamiento ? c.id_tratamiento.nombre : 'Tratamiento no disponible'
         }));
 
         res.status(200).json(citasFormateadas);
@@ -59,10 +65,10 @@ const getCitasPorFecha = async (req = request, res = response) => {
     }
 
     try {
-        const citas = await Cita.find({ fecha, estado: { $ne: 'Cancelado' } })
+        const citas = await Cita.find({ fecha })
             .populate('id_paciente', 'nombres apellido_paterno apellido_materno telefono')
             .populate('id_tratamiento', 'nombre')
-            .sort({ hora: 1 });
+            .sort({ estado: 1, hora: 1 });
 
         const citasFormateadas = citas.map(c => ({
             _id: c._id,

@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./database');
+const path = require('path');
 
 class Server {
     constructor() {
@@ -16,6 +17,8 @@ class Server {
 
         this.app.use(express.json());
         this.app.use(cors());
+
+        this.app.use('/imagenes', express.static(path.join(__dirname, '../../..', 'consultorio-dental/public/Imagenes')));
 
         this.routes();
         connectDB();

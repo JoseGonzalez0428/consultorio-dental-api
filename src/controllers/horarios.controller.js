@@ -35,6 +35,12 @@ const agregarHorario = async (req = request, res = response) => {
         });
     }
 
+    if (hora_inicio.split(':')[1] !== '00' || hora_fin.split(':')[1] !== '00') {
+        return res.status(400).json({
+            msg: 'Los horarios deben ser en horas completas'
+        });
+    }
+
     if (hora_inicio >= hora_fin) {
         return res.status(400).json({
             msg: 'La hora de inicio debe ser menor que la hora de fin'
@@ -61,23 +67,54 @@ const agregarHorario = async (req = request, res = response) => {
 };
 
 const eliminarHorario = async (req = request, res = response) => {
-    const { fecha } = req.params;
+    const { id } = req.params; 
 
     try {
-        await Horario.deleteMany({ fecha });
+        const horarioEliminado = await Horario.findByIdAndDelete(id);
+
+        if (!horarioEliminado) {
+            return res.status(404).json({
+                msg: 'No se encontró el bloque de horario especificado'
+            });
+        }
 
         res.status(200).json({
-            msg: 'Horarios eliminados correctamente'
+            msg: 'Bloque de horario eliminado correctamente'
         });
     } catch (error) {
         res.status(500).json({
-            msg: 'Error al eliminar los horarios'
+            msg: 'Error al eliminar el bloque de horario'
         });
     }
 };
 
+const eliminarHorarioPorBloque = async (req = request, res = response) => {
+  const { id } = req.params;
+
+  try {
+    const horario = await Horario.findById(id);
+
+    if (!horario) {
+      return res.status(404).json({
+        msg: 'Horario no encontrado'
+      });
+    }
+
+    await Horario.findByIdAndDelete(id);
+
+    res.status(200).json({
+      msg: 'Horario eliminado correctamente'
+    });
+  } catch (error) {
+    res.status(500).json({
+      msg: 'Error al eliminar el horario'
+    });
+  }
+};
+
 module.exports = {
-    getHorarios,
-    agregarHorario,
-    eliminarHorario
+  getHorarios,
+  agregarHorario,
+  eliminarHorario,
+  eliminarHorarioPorBloque
 };
