@@ -35,6 +35,14 @@ const getTratamientoById = async (req = request, res = response) => {
 const crearTratamiento = async (req = request, res = response) => {
     const { nombre, descripcion, precio, imagen, recomendaciones } = req.body;
 
+    const tratamientoExistente = await Tratamiento.findOne({ nombre });
+
+    if (tratamientoExistente) {
+        return res.status(400).json({
+            msg: 'Ya existe un tratamiento con ese nombre'
+        });
+    }
+
     if (!nombre || !descripcion || !precio || !imagen) {
         return res.status(400).json({
             msg: 'Datos incompletos'
