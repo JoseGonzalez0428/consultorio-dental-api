@@ -2,7 +2,7 @@ const { response, request } = require('express');
 const jwt = require('jsonwebtoken');
 const Usuario = require('../models/usuario.model');
 
-const verifyAdminRole = async (req = request, res = response, next) => {
+const verifyClientRole = async (req = request, res = response, next) => {
     const token = req.header('Authorization');
 
     if (!token) {
@@ -17,8 +17,8 @@ const verifyAdminRole = async (req = request, res = response, next) => {
             return res.status(401).json({ msg: 'Token inválido' });
         }
 
-        if (usuario.tipo_usuario !== 'admin') {
-            return res.status(403).json({ msg: 'Acceso denegado' });
+        if (usuario.tipo_usuario !== 'cliente') {
+            return res.status(403).json({ msg: 'Solo los pacientes pueden realizar esta acción' });
         }
 
         req.activeUserId = usuario._id;
@@ -29,4 +29,4 @@ const verifyAdminRole = async (req = request, res = response, next) => {
     }
 };
 
-module.exports = { verifyAdminRole };
+module.exports = { verifyClientRole };

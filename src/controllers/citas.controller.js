@@ -55,6 +55,16 @@ const getMisCitas = async (req = request, res = response) => {
     }
 };
 
+const getFechasConCitas = async (req = request, res = response) => {
+    try {
+        const citas = await Cita.find({ estado: { $ne: 'Cancelado' } });
+        const fechas = [...new Set(citas.map(c => c.fecha))].sort();
+        res.status(200).json(fechas);
+    } catch (error) {
+        res.status(500).json({ msg: 'Error al obtener fechas' });
+    }
+};
+
 const getCitasPorFecha = async (req = request, res = response) => {
     const { fecha } = req.query;
 
@@ -156,6 +166,14 @@ const agendarCita = async (req = request, res = response) => {
     }
 };
 
+const validar24Horas = (fecha, hora) => {
+    const fechaHoraCita = new Date(`${fecha}T${hora}:00`);
+    const ahora = new Date();
+    const diferencia = fechaHoraCita - ahora;
+    const horas = diferencia / (1000 * 60 * 60);
+    return horas >= 24;
+};
+
 const modificarCita = async (req = request, res = response) => {
     const { id } = req.params;
     const { fecha, hora } = req.body;
@@ -164,8 +182,12 @@ const modificarCita = async (req = request, res = response) => {
         const cita = await Cita.findById(id);
 
         if (!cita) {
-            return res.status(404).json({
-                msg: 'Cita no encontrada'
+            return res.status(404).json({ msg: 'Cita no encontrada' });
+        }
+
+        if (!validar24Horas(cita.fecha, cita.hora)) {
+            return res.status(400).json({
+                msg: 'No puedes modificar una cita con menos de 24 horas de anticipación'
             });
         }
 
@@ -177,20 +199,14 @@ const modificarCita = async (req = request, res = response) => {
         });
 
         if (citaOcupada) {
-            return res.status(400).json({
-                msg: 'Ese horario ya está ocupado'
-            });
+            return res.status(400).json({ msg: 'Ese horario ya está ocupado' });
         }
 
         await Cita.findByIdAndUpdate(id, { fecha, hora });
 
-        res.status(200).json({
-            msg: 'Cita modificada correctamente'
-        });
+        res.status(200).json({ msg: 'Cita modificada correctamente' });
     } catch (error) {
-        res.status(500).json({
-            msg: 'Error al modificar la cita'
-        });
+        res.status(500).json({ msg: 'Error al modificar la cita' });
     }
 };
 
@@ -201,20 +217,20 @@ const cancelarCita = async (req = request, res = response) => {
         const cita = await Cita.findById(id);
 
         if (!cita) {
-            return res.status(404).json({
-                msg: 'Cita no encontrada'
+            return res.status(404).json({ msg: 'Cita no encontrada' });
+        }
+
+        if (!validar24Horas(cita.fecha, cita.hora)) {
+            return res.status(400).json({
+                msg: 'No puedes cancelar una cita con menos de 24 horas de anticipación'
             });
         }
 
         await Cita.findByIdAndUpdate(id, { estado: 'Cancelado' });
 
-        res.status(200).json({
-            msg: 'Cita cancelada correctamente'
-        });
+        res.status(200).json({ msg: 'Cita cancelada correctamente' });
     } catch (error) {
-        res.status(500).json({
-            msg: 'Error al cancelar la cita'
-        });
+        res.status(500).json({ msg: 'Error al cancelar la cita' });
     }
 };
 
@@ -244,10 +260,11 @@ const completarCita = async (req = request, res = response) => {
 
 module.exports = {
     getMisCitas,
+    getFechasConCitas,
     getCitasPorFecha,
     getHorasOcupadas,
     agendarCita,
     modificarCita,
     cancelarCita,
-    completarCita
+    completarCita,
 };

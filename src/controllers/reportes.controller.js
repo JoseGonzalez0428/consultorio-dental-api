@@ -76,6 +76,32 @@ const getCitasPasadasPorFecha = async (req = request, res = response) => {
     }
 };
 
+const getFechasConCitasSinReporte = async (req = request, res = response) => {
+    try {
+        const hoy = new Date().toISOString().split('T')[0];
+
+        const reportesExistentes = await Reporte.find({}, 'id_cita');
+        const idCitasConReporte = reportesExistentes.map(r => r.id_cita.toString());
+
+        const citas = await Cita.find({
+            fecha: { $lt: hoy },
+            estado: 'Terminado'
+        });
+
+        const fechasSinReporte = [...new Set(
+            citas
+                .filter(c => !idCitasConReporte.includes(c._id.toString()))
+                .map(c => c.fecha)
+        )].sort();
+
+        res.status(200).json(fechasSinReporte);
+    } catch (error){
+        res.status(500).json({
+            msg: 'Error al obtener las fechas'
+        });
+    }
+};
+
 const crearReporte = async (req = request, res = response) => {
     const { id_cita, notas } = req.body;
 
@@ -91,6 +117,14 @@ const crearReporte = async (req = request, res = response) => {
         if (!cita) {
             return res.status(404).json({
                 msg: 'Cita no encontrada'
+            });
+        }
+
+        const reporteExistente = await Reporte.findOne({ id_cita });
+
+        if (reporteExistente) {
+            return res.status(400).json({
+                msg: 'Esta cita ya tiene un reporte creado'
             });
         }
 
@@ -123,6 +157,7 @@ const crearReporte = async (req = request, res = response) => {
 
 module.exports = {
     getReportes,
+    getFechasConCitasSinReporte,
     getCitasPasadasPorFecha,
     crearReporte
 };
