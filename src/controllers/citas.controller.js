@@ -80,7 +80,9 @@ const getCitasPorFecha = async (req = request, res = response) => {
             .populate('id_tratamiento', 'nombre')
             .sort({ estado: 1, hora: 1 });
 
-        const citasFormateadas = citas.map(c => ({
+        const citasFormateadas = citas
+        .filter(c => c.id_paciente && c.id_tratamiento)
+        .map(c => ({
             _id: c._id,
             fecha: c.fecha,
             hora: c.hora,

@@ -30,39 +30,37 @@ const agregarHorario = async (req = request, res = response) => {
     const { fecha, hora_inicio, hora_fin } = req.body;
 
     if (!fecha || !hora_inicio || !hora_fin) {
-        return res.status(400).json({
-            msg: 'Datos incompletos'
-        });
+        return res.status(400).json({ msg: 'Datos incompletos' });
     }
 
     if (hora_inicio.split(':')[1] !== '00' || hora_fin.split(':')[1] !== '00') {
-        return res.status(400).json({
-            msg: 'Los horarios deben ser en horas completas'
-        });
+        return res.status(400).json({ msg: 'Los horarios deben ser en horas completas' });
     }
 
     if (hora_inicio >= hora_fin) {
-        return res.status(400).json({
-            msg: 'La hora de inicio debe ser menor que la hora de fin'
-        });
+        return res.status(400).json({ msg: 'La hora de inicio debe ser menor que la hora de fin' });
     }
 
     try {
-        const nuevoHorario = new Horario({
-            fecha,
-            hora_inicio,
-            hora_fin
-        });
+        const inicio = new Date(`2000-01-01T${hora_inicio}`);
+        const fin = new Date(`2000-01-01T${hora_fin}`);
+        const bloques = [];
 
-        await nuevoHorario.save();
+        while (inicio < fin) {
+            const horaIni = inicio.toTimeString().slice(0, 5);
+            inicio.setHours(inicio.getHours() + 1);
+            const horaFin = inicio.toTimeString().slice(0, 5);
 
-        res.status(201).json({
-            msg: 'Horario agregado correctamente'
-        });
+            if (inicio <= fin) {
+                bloques.push({ fecha, hora_inicio: horaIni, hora_fin: horaFin });
+            }
+        }
+
+        await Horario.insertMany(bloques);
+
+        res.status(201).json({ msg: 'Horario agregado correctamente' });
     } catch (error) {
-        res.status(500).json({
-            msg: 'Error al agregar el horario'
-        });
+        res.status(500).json({ msg: 'Error al agregar el horario' });
     }
 };
 
