@@ -14,6 +14,7 @@ class Server {
         this.citasPath = '/api/citas';
         this.horariosPath = '/api/horarios';
         this.reportesPath = '/api/reportes';
+        this.resenasPath = '/api/resenas';
 
         this.app.use(express.json());
         this.app.use(cors());
@@ -31,6 +32,7 @@ class Server {
         this.app.use(this.citasPath, require('../routes/citas.routes'));
         this.app.use(this.horariosPath, require('../routes/horarios.routes'));
         this.app.use(this.reportesPath, require('../routes/reportes.routes'));
+        this.app.use(this.resenasPath, require('../routes/resenas.routes'));
     }
 
     listen() {

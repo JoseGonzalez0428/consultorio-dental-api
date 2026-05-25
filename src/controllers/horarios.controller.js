@@ -52,8 +52,18 @@ const agregarHorario = async (req = request, res = response) => {
             const horaFin = inicio.toTimeString().slice(0, 5);
 
             if (inicio <= fin) {
-                bloques.push({ fecha, hora_inicio: horaIni, hora_fin: horaFin });
+                const existente = await Horario.findOne({
+                    fecha,
+                    hora_inicio: horaIni
+                });
+
+                if(!existente) {
+                    bloques.push({ fecha, hora_inicio: horaIni, hora_fin: horaFin });
+                }
             }
+        }
+        if (bloques.length === 0) {
+            return res.status(400).json({ msg: 'No se pueden agregar horarios, ya existen para ese rango' });
         }
 
         await Horario.insertMany(bloques);
