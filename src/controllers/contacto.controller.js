@@ -1,15 +1,7 @@
-const { response, request } = require('express');
-const nodemailer = require('nodemailer');
+const sgMail = require('@sendgrid/mail');
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    }
-});
-
-const enviarContacto = async (req = request, res = response) => {
+const enviarContacto = async (req, res) => {
     const { nombre, apellidos, correo, mensaje } = req.body;
 
     if (!nombre || !correo || !mensaje) {
@@ -17,9 +9,9 @@ const enviarContacto = async (req = request, res = response) => {
     }
 
     try {
-        await transporter.sendMail({
-            from: process.env.EMAIL_USER,
+        await sgMail.send({
             to: process.env.EMAIL_USER,
+            from: process.env.EMAIL_USER,
             subject: `Mensaje de contacto de ${nombre} ${apellidos}`,
             html: `
                 <h3>Nuevo mensaje de contacto</h3>
@@ -31,6 +23,7 @@ const enviarContacto = async (req = request, res = response) => {
 
         res.status(200).json({ msg: 'Mensaje enviado correctamente' });
     } catch (error) {
+        console.error('Error al enviar correo:', error);
         res.status(500).json({ msg: 'Error al enviar el mensaje' });
     }
 };
