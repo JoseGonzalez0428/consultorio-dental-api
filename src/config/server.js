@@ -21,8 +21,8 @@ class Server {
         this.app.use(cors({
             origin: [
                 'http://localhost:4200',
-                'https://consultorio-dental-xxxxx.web.app',
-                'https://consultorio-dental-xxxxx.firebaseapp.com'
+                'https://consultorio-dental-a5523.web.app',
+                'https://consultorio-dental-a5523.firebaseapp.com'
             ],
             methods: ['GET', 'POST', 'PUT', 'DELETE'],
             allowedHeaders: ['Content-Type', 'Authorization']
