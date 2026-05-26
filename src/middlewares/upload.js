@@ -1,14 +1,14 @@
 const multer = require('multer');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const cloudinary = require('../config/cloudinary');
 const path = require('path');
 
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, process.env.UPLOADS_PATH);
-    },
-    filename: function (req, file, cb) {
-        const ext = path.extname(file.originalname);
-        const nombre = file.fieldname + '-' + Date.now() + ext;
-        cb(null, nombre);
+const storage = new CloudinaryStorage({
+    cloudinary,
+    params: {
+        folder: 'consultorio-dental',
+        allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+        transformation: [{ width: 800, height: 600, crop: 'limit' }]
     }
 });
 

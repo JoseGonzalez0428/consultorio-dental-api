@@ -18,7 +18,15 @@ class Server {
         this.contactoPath = '/api/contacto';
 
         this.app.use(express.json());
-        this.app.use(cors());
+        this.app.use(cors({
+            origin: [
+                'http://localhost:4200',
+                'https://consultorio-dental-xxxxx.web.app',
+                'https://consultorio-dental-xxxxx.firebaseapp.com'
+            ],
+            methods: ['GET', 'POST', 'PUT', 'DELETE'],
+            allowedHeaders: ['Content-Type', 'Authorization']
+        }));
 
         this.app.use('/imagenes', express.static(path.join(__dirname, '../../..', 'consultorio-dental/public/Imagenes')));
 

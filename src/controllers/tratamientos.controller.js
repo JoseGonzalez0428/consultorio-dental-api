@@ -86,7 +86,7 @@ const crearTratamiento = async (req = request, res = response) => {
             nombre,
             descripcion,
             precio,
-            imagen: req.file.filename,
+            imagen: req.file.path,
             recomendaciones: recomendacionesArray
         });
 
@@ -127,7 +127,7 @@ const actualizarTratamiento = async (req = request, res = response) => {
         };
 
         if (req.file) {
-            datosActualizados.imagen = req.file.filename;
+            datosActualizados.imagen = req.file.path;
         }
 
         await Tratamiento.findByIdAndUpdate(id, datosActualizados);
