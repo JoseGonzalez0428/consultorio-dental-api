@@ -99,8 +99,66 @@ const puedeResenar = async (req = request, res = response) => {
     }
 };
 
+const actualizarResena = async (req = request, res = response) => {
+    const { id } = req.params;
+    const { calificacion, comentario } = req.body;
+    const id_paciente = req.activeUserId;
+
+    if (!calificacion) {
+        return res.status(400).json({ msg: 'La calificación es requerida' });
+    }
+
+    if (calificacion < 1 || calificacion > 5) {
+        return res.status(400).json({ msg: 'La calificación debe ser entre 1 y 5' });
+    }
+
+    try {
+        const resena = await Resena.findById(id);
+
+        if (!resena) {
+            return res.status(404).json({ msg: 'Reseña no encontrada' });
+        }
+
+        if (resena.id_paciente.toString() !== id_paciente.toString()) {
+            return res.status(403).json({ msg: 'No puedes editar una reseña que no es tuya' });
+        }
+
+        await Resena.findByIdAndUpdate(id, { calificacion, comentario });
+
+        res.status(200).json({ msg: 'Reseña actualizada correctamente' });
+    } catch (error) {
+        res.status(500).json({ msg: 'Error al actualizar la reseña' });
+    }
+};
+
+const eliminarResena = async (req = request, res = response) => {
+    const { id } = req.params;
+    const id_paciente = req.activeUserId;
+    const rol = req.activeUserRole;
+
+    try {
+        const resena = await Resena.findById(id);
+
+        if (!resena) {
+            return res.status(404).json({ msg: 'Reseña no encontrada' });
+        }
+
+        if (rol !== 'admin' && resena.id_paciente.toString() !== id_paciente.toString()) {
+            return res.status(403).json({ msg: 'No puedes eliminar una reseña que no es tuya' });
+        }
+
+        await Resena.findByIdAndDelete(id);
+
+        res.status(200).json({ msg: 'Reseña eliminada correctamente' });
+    } catch (error) {
+        res.status(500).json({ msg: 'Error al eliminar la reseña' });
+    }
+};
+
 module.exports = {
     getResenasPorTratamiento,
     crearResena,
-    puedeResenar
+    puedeResenar,
+    actualizarResena,
+    eliminarResena
 };

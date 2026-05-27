@@ -155,9 +155,52 @@ const crearReporte = async (req = request, res = response) => {
     }
 };
 
+const actualizarReporte = async (req = request, res = response) => {
+    const { id } = req.params;
+    const { notas } = req.body;
+
+    if (!notas) {
+        return res.status(400).json({ msg: 'Las notas son requeridas' });
+    }
+
+    try {
+        const reporte = await Reporte.findById(id);
+
+        if (!reporte) {
+            return res.status(404).json({ msg: 'Reporte no encontrado' });
+        }
+
+        await Reporte.findByIdAndUpdate(id, { notas });
+
+        res.status(200).json({ msg: 'Reporte actualizado correctamente' });
+    } catch (error) {
+        res.status(500).json({ msg: 'Error al actualizar el reporte' });
+    }
+};
+
+const eliminarReporte = async (req = request, res = response) => {
+    const { id } = req.params;
+
+    try {
+        const reporte = await Reporte.findById(id);
+
+        if (!reporte) {
+            return res.status(404).json({ msg: 'Reporte no encontrado' });
+        }
+
+        await Reporte.findByIdAndDelete(id);
+
+        res.status(200).json({ msg: 'Reporte eliminado correctamente' });
+    } catch (error) {
+        res.status(500).json({ msg: 'Error al eliminar el reporte' });
+    }
+};
+
 module.exports = {
     getReportes,
     getFechasConCitasSinReporte,
     getCitasPasadasPorFecha,
-    crearReporte
+    crearReporte,
+    actualizarReporte,
+    eliminarReporte
 };
