@@ -3,22 +3,27 @@ const Cita = require('../models/cita.model');
 const Usuario = require('../models/usuario.model');
 const Tratamiento = require('../models/tratamiento.model');
 const nodemailer = require('nodemailer');
-
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    }
-});
+const sgMail = require('@sendgrid/mail');
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const enviarCorreoCita = async (correo, nombre, fecha, hora) => {
     try {
-        await transporter.sendMail({
-            from: process.env.EMAIL_USER,
+        await sgMail.send({
             to: correo,
-            subject: 'Confirmación de cita',
-            html: `Hola <strong>${nombre}</strong>,<br>Tu cita ha sido agendada para el <strong>${fecha}</strong> a las <strong>${hora}</strong>.<br><br>Gracias por confiar en nosotros.<br><br>Consultorio Dental`
+            from: process.env.EMAIL_USER,
+            subject: 'Confirmación de cita - Odontología Integral Flores',
+            html: `
+                <h2>¡Cita confirmada!</h2>
+                <p>Hola <strong>${nombre}</strong>,</p>
+                <p>Tu cita ha sido agendada exitosamente.</p>
+                <p><strong>Fecha:</strong> ${fecha}</p>
+                <p><strong>Hora:</strong> ${hora}</p>
+                <br>
+                <p>Gracias por confiar en nosotros.</p>
+                <p><em>Odontología Integral Flores</em></p>
+                <p>Juan Bustamante 39, Abasolo, 79500 Villa de Reyes, S.L.P.</p>
+                <p>Tel: +52 485 106 0414</p>
+            `
         });
     } catch (error) {
         console.log('Error al enviar correo:', error);
