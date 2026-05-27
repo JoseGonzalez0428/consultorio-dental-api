@@ -46,7 +46,8 @@ const login = async (req = request, res = response) => {
                 token,
                 tipo_usuario: usuario.tipo_usuario,
                 nombre: usuario.nombres,
-                sexo: usuario.sexo
+                sexo: usuario.sexo,
+                id: usuario._id
             });
         });
 

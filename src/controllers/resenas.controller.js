@@ -12,6 +12,7 @@ const getResenasPorTratamiento = async (req = request, res = response) => {
 
         const resenasFormateadas = resenas.map(r => ({
             _id: r._id,
+            id_paciente: r.id_paciente._id,
             calificacion: r.calificacion,
             comentario: r.comentario,
             fecha: r.fecha,
